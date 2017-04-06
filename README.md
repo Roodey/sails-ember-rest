@@ -184,6 +184,10 @@ As a **quick example**, if you create a `post` model under the namespace `api/v1
 ### Refactor into ES6
 
 - Because it's 2017!
+    -actionUtil.js: var removed, used arrow functions where it is safe.
+    -EmberController.js: 
+        -Create: var removed, looking for more appropriate refactorings
+        -Delete: var removed, looking for more appropriate refactorings
 
 ### Generator: Improve installation
 
