@@ -1,11 +1,11 @@
 /**
  * Module dependencies
  */
-var _ = require('lodash');
-var util = require('util');
+let _ = require('lodash');
+let util = require('util');
 // Parameter used for jsonp callback is constant, as far as
 // blueprints are concerned (for now.)
-var JSONP_CALLBACK_PARAM = 'callback';
+let JSONP_CALLBACK_PARAM = 'callback';
 /**
  * Utility methods used in built-in blueprint actions.
  *
@@ -17,15 +17,15 @@ module.exports = {
      * @param  {Waterline Collection}  Model
      * @return {Array}                 Extended version of the Model.associations with `includeIn` defintions
      */
-    getAssociationConfiguration: function(Model, style){
+    getAssociationConfiguration: (Model, style) => {
         // get configured defaults or always embed full records
-        var presentationDefaults = sails.config.models.associations || {
+        let presentationDefaults = sails.config.models.associations || {
             list: "record",
             detail: "record"
         };
-        var associations = Model.associations;
-        var attributes = Model._attributes;
-        associations.forEach(function(assoc){
+        let associations = Model.associations;
+        let attributes = Model._attributes;
+        associations.forEach((assoc) => {
             assoc.include = _.extend({}, presentationDefaults, attributes[assoc.alias].includeIn)[style]; // extend association object with presentation configuration
             if(attributes[assoc.alias].through)
             {
@@ -41,18 +41,18 @@ module.exports = {
      * @param  {[type]}   associations [description]
      * @param  {Function} done         [description]
      */
-    populateIndexes: function ( parentModel, ids, associations, done ) {
-        async.reduce(associations, {}, function (associatedRecords, association, next){
+    populateIndexes: ( parentModel, ids, associations, done ) => {
+        async.reduce(associations, {},  (associatedRecords, association, next) => {
             if(association.include === "index")
             {
-                var assocModel = null;
-                var assocCriteria = {};
+                let assocModel = null;
+                let assocCriteria = {};
 
                 if(association.through)
                 {
                     assocModel = sails.models[association.through];
                     assocCriteria[parentModel.identity] = ids;
-                    assocModel.find(assocCriteria).exec(function(err, recs){
+                    assocModel.find(assocCriteria).exec((err, recs) => {
                         associatedRecords[association.alias] = recs;
                         next( err, associatedRecords );
                     });
@@ -61,7 +61,7 @@ module.exports = {
                 {
                     assocModel = sails.models[association.collection];
                     assocCriteria[association.via] = ids;
-                    assocModel.find(assocCriteria).exec(function(err, recs){
+                    assocModel.find(assocCriteria).exec((err, recs) => {
                         associatedRecords[ association.alias ] = recs;
                         next( err, associatedRecords );
                     });
@@ -74,7 +74,7 @@ module.exports = {
                 }
                 if(assocModel === null)
                 {
-                    return next(new Error("Could not find associated model for: " + association.alias));
+                    return next(new Error(`Could not find associated model for:  ${association.alias}`));
                 }
             }
             else
@@ -90,8 +90,8 @@ module.exports = {
      * @param  {[type]} associations [description]
      * @return {[type]}              [description]
      */
-    populateRecords: function (query, associations, force){
-        associations.forEach(function(assoc){
+    populateRecords: (query, associations, force) => {
+        associations.forEach((assoc) => {
             // if the associations is to be populated with the full records...
             if(assoc.include === "record" || force)
             {
@@ -110,11 +110,11 @@ module.exports = {
      * @param   {Request} req
      * @return {Query}
      */
-    populateEach: function(query, req){
-        var DEFAULT_POPULATE_LIMIT = sails.config.blueprints.defaultLimit || 30;
-        var _options = req.options;
-        var aliasFilter = req.param( 'populate' );
-        var shouldPopulate = _options.populate;
+    populateEach: (query, req) =>{
+        let DEFAULT_POPULATE_LIMIT = sails.config.blueprints.defaultLimit || 30;
+        let _options = req.options;
+        let aliasFilter = req.param( 'populate' );
+        let shouldPopulate = _options.populate;
 
         // Convert the string representation of the filter list to an Array. We
         // need this to provide flexibility in the request param. This way both
@@ -144,7 +144,7 @@ module.exports = {
             // (true to populate, false to not)
             if ( shouldPopulate )
             {
-                var populationLimit =
+                let populationLimit =
                     _options[ 'populate_' + association.alias + '_limit' ] ||
                     _options.populate_limit ||
                     _options.limit ||
@@ -164,11 +164,11 @@ module.exports = {
      * @param   {[type]} record         [description]
      * @return {[type]}                 [description]
      */
-    subscribeDeep: function(req, record){
-        req.options.associations.forEach(function ( assoc ) {
+    subscribeDeep: (req, record) => {
+        req.options.associations.forEach(( assoc ) => {
             // Look up identity of associated model
-            var ident = assoc[assoc.type];
-            var AssociatedModel = sails.models[ident];
+            let ident = assoc[assoc.type];
+            let AssociatedModel = sails.models[ident];
             if(req.options.autoWatch)
             {
                 AssociatedModel.watch( req );
@@ -177,7 +177,7 @@ module.exports = {
             // Subscribe to each associated model instance in a collection
             if(assoc.type === 'collection')
             {
-                record[assoc.alias].forEach(function(associatedInstance){
+                record[assoc.alias].forEach((associatedInstance) => {
                     AssociatedModel.subscribe( req, associatedInstance );
                 });
             }
@@ -196,8 +196,8 @@ module.exports = {
      * @param   {Request} req
      * @return {Integer|String}
      */
-    parsePk: function ( req ) {
-        var pk = req.options.id || ( req.options.where && req.options.where.id ) || req.param( 'id' );
+    parsePk: ( req ) => {
+        let pk = req.options.id || ( req.options.where && req.options.where.id ) || req.param( 'id' );
 
         // TODO: make this smarter...
         // (e.g. look for actual primary key of model and look for it
@@ -216,8 +216,8 @@ module.exports = {
      * @param   {Request} req
      * @return {Integer|String}
      */
-    requirePk: function ( req ) {
-        var pk = module.exports.parsePk( req );
+    requirePk: ( req ) => {
+        let pk = module.exports.parsePk( req );
 
         // Validate the required `id` parameter
         if ( !pk )
@@ -241,19 +241,19 @@ module.exports = {
      * @param   {Request} req
      * @return {Object}                     the WHERE criteria object
      */
-    parseCriteria: function ( req ) {
+    parseCriteria: ( req ) => {
         // Allow customizable blacklist for params NOT to include as criteria.
         req.options.criteria = req.options.criteria || {};
         req.options.criteria.blacklist = req.options.criteria.blacklist || [ 'limit', 'skip', 'sort', 'populate' ];
         // Validate blacklist to provide a more helpful error msg.
-        var blacklist = req.options.criteria && req.options.criteria.blacklist;
+        let blacklist = req.options.criteria && req.options.criteria.blacklist;
         if(blacklist && !_.isArray(blacklist))
         {
             throw new Error( 'Invalid `req.options.criteria.blacklist`. Should be an array of strings (parameter names.)' );
         }
 
         // Look for explicitly specified `where` parameter.
-        var where = req.params.all().where;
+        let where = req.params.all().where;
 
         // If `where` parameter is a string, try to interpret it as JSON
         if (_.isString(where))
@@ -274,7 +274,7 @@ module.exports = {
             where = _.omit(where, blacklist || ['limit', 'skip', 'sort']);
 
             // Omit any params w/ undefined values
-            where = _.omit(where, function(p){
+            where = _.omit(where, (p) => {
                 if(_.isUndefined(p)) return true;
             });
 
@@ -286,7 +286,7 @@ module.exports = {
             }
 
             // Omit jsonp callback param (but only if jsonp is enabled)
-            var jsonpOpts = req.options.jsonp && !req.isSocket;
+            let jsonpOpts = req.options.jsonp && !req.isSocket;
             jsonpOpts = _.isObject( jsonpOpts ) ? jsonpOpts : {
                 callback: JSONP_CALLBACK_PARAM
             };
@@ -309,7 +309,7 @@ module.exports = {
      * @param   {Request} req
      * @return {Object}
      */
-    parseValues: function ( req, model ) {
+    parseValues: ( req, model ) => {
         // Create data object (monolithic combination of all parameters)
         // Omit the blacklisted params (like JSONP callback param, etc.)
 
@@ -317,8 +317,8 @@ module.exports = {
         req.options.values = req.options.values || {};
         req.options.values.blacklist = req.options.values.blacklist;
 
-        // Validate blacklist to provide a more helpful error msg.
-        var blacklist = req.options.values.blacklist;
+        // Validate blacklist to provide a more helpful error msg. No changing values, so const.
+        const blacklist = req.options.values.blacklist; 
         if(blacklist && !_.isArray(blacklist))
         {
             throw new Error( 'Invalid `req.options.values.blacklist`. Should be an array of strings (parameter names.)' );
@@ -331,12 +331,12 @@ module.exports = {
         values = _.omit(values, blacklist || []);
 
         // Omit any params w/ undefined values
-        values = _.omit(values, function (p){
+        values = _.omit(values, (p) => {
             if(_.isUndefined(p)) return true;
         });
 
         // Omit jsonp callback param (but only if jsonp is enabled)
-        var jsonpOpts = req.options.jsonp && !req.isSocket;
+        let jsonpOpts = req.options.jsonp && !req.isSocket;
         jsonpOpts = _.isObject( jsonpOpts ) ? jsonpOpts : {
             callback: JSONP_CALLBACK_PARAM
         };
@@ -353,13 +353,13 @@ module.exports = {
      * @param   {Request} req
      * @return {WLCollection}
      */
-    parseModel: function(req){
+    parseModel: (req) => {
         // Ensure a model can be deduced from the request options.
-        var model = req.options.model || req.options.controller;
+        let model = req.options.model || req.options.controller;
         if(!model) throw new Error(util.format('No "model" specified in route options.'));
 
-        var Model = req._sails.models[model];
-        if(!Model) throw new Error( util.format('Invalid route option, "model".\nI don\'t know about any models named: `%s`', model));
+        let Model = req._sails.models[model];
+        if(!Model) throw new Error( `Invalid route option, "model".\nI don\'t know about any models named: ${model}`);
 
         return Model;
     },
@@ -367,8 +367,8 @@ module.exports = {
     /**
      * @param   {Request} req
      */
-    parseSort: function(req){
-        var sort = req.param('sort') || req.options.sort;
+    parseSort: (req) => {
+        let sort = req.param('sort') || req.options.sort;
         if (_.isUndefined(sort)) {return undefined;}
 
         // If `sort` is a string, attempt to JSON.parse() it.
@@ -387,9 +387,9 @@ module.exports = {
     /**
      * @param   {Request} req
      */
-    parseLimit: function(req){
-        var DEFAULT_LIMIT = sails.config.blueprints.defaultLimit || false;
-        var limit = req.param( 'limit' ) || ( typeof req.options.limit !== 'undefined' ? req.options.limit : DEFAULT_LIMIT );
+    parseLimit: (req) => {
+        let DEFAULT_LIMIT = sails.config.blueprints.defaultLimit || false;
+        let limit = req.param( 'limit' ) || ( typeof req.options.limit !== 'undefined' ? req.options.limit : DEFAULT_LIMIT );
         if ( limit ) {
             limit = +limit;
         }
@@ -399,9 +399,9 @@ module.exports = {
     /**
      * @param   {Request} req
      */
-    parseSkip: function(req){
-        var DEFAULT_SKIP = 0;
-        var skip = req.param( 'skip' ) || ( typeof req.options.skip !== 'undefined' ? req.options.skip : DEFAULT_SKIP );
+    parseSkip: (req) => {
+        const DEFAULT_SKIP = 0;
+        let skip = req.param( 'skip' ) || ( typeof req.options.skip !== 'undefined' ? req.options.skip : DEFAULT_SKIP );
         if ( skip ) {
             skip = +skip;
         }
@@ -411,7 +411,7 @@ module.exports = {
     /**
      * @param   {Request} req
      */
-    parseLocals: function(req){
+    parseLocals: (req) => {
         return (typeof req.options.locals !== 'undefined' && req.options.locals !== null) ? req.options.locals : null;
     }
 };

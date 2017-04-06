@@ -4,11 +4,11 @@
  * @description :: Server-side logic for a generic crud controller that can be used to represent all models
  * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
  */
-var util = require('util');
-var actionUtil = require('./../util/actionUtil');
-var pluralize = require('pluralize');
-var _ = require('lodash');
-var baseController = {
+let util = require('util');
+let actionUtil = require('./../util/actionUtil');
+let pluralize = require('pluralize');
+let _ = require('lodash');
+let baseController = {
     setServiceInterrupt: function(name, fn){
         if(this.interrupts.hasOwnProperty(name) && typeof fn === 'function')
         {
@@ -17,11 +17,11 @@ var baseController = {
         return this;
     },
     create: function (req, res) {
-        var Model = actionUtil.parseModel( req );
-        var data = actionUtil.parseValues( req, Model );
+        let Model = actionUtil.parseModel( req );
+        let data = actionUtil.parseValues( req, Model );
         // Look up the association configuration and determine how to populate the query
         // @todo support request driven selection of includes/populate
-        var associations = actionUtil.getAssociationConfiguration(Model, "detail");
+        let associations = actionUtil.getAssociationConfiguration(Model, "detail");
         // Create new instance of model using data from params
         Model.create(data).exec(function(err, newInstance){
             // Differentiate between waterline-originated validation errors
@@ -41,7 +41,7 @@ var baseController = {
             }
             this.interrupts.create.call(this, req, res, function(){
                 // Do a final query to populate the associations of the record.
-                var Q = Model.findOne(newInstance[Model.primaryKey]);
+                let Q = Model.findOne(newInstance[Model.primaryKey]);
                 Q = actionUtil.populateRecords(Q, associations);
                 Q.exec(function(err, populatedRecord){
                     if(err) return res.serverError(err);
@@ -57,12 +57,12 @@ var baseController = {
         }.bind(this));
     },
     destroy: function(req, res){
-        var Model = actionUtil.parseModel( req );
-        var pk = actionUtil.requirePk( req );
-        var query = Model.findOne( pk );
+        let Model = actionUtil.parseModel( req );
+        let pk = actionUtil.requirePk( req );
+        let query = Model.findOne( pk );
         // Look up the association configuration and determine how to populate the query
         // @todo support request driven selection of includes/populate
-        var associations = actionUtil.getAssociationConfiguration(Model, "list");
+        let associations = actionUtil.getAssociationConfiguration(Model, "list");
         query = actionUtil.populateEach(query, req);
         query.exec(function(err, record){
             if(err)
@@ -267,7 +267,7 @@ var baseController = {
             .exec(function(err, matchingRecord){
                 if(err) return res.serverError(err);
                 if(!matchingRecord) return res.notFound('No record found with the specified id.');
-                if(!matchingRecord[relation]) return res.notFound(util.format('Specified record (%s) is missing relation `%s`', parentPk, relation));
+                if(!matchingRecord[relation]) return res.notFound(`Specified record ${parentPk} is missing relation ${relation}`);
                 this.interrupts.populate.call(this, req, res, function(){
                     // Subcribe to instance, if relevant
                     // TODO: only subscribe to populated attribute- not the entire model
@@ -290,7 +290,7 @@ var baseController = {
                         relationIdentity = association.collection;
                     }
                     var RelatedModel = req._sails.models[relationIdentity];
-                    if(!RelatedModel) throw new Error(util.format('Invalid route option, "model".\nI don\'t know about any models named: `%s`', relationIdentity));
+                    if(!RelatedModel) throw new Error(`Invalid route option, "model".\nI don\'t know about any models named: ${relationIdentity}`);
 
                     documentIdentifier = pluralize(_.kebabCase( RelatedModel.globalId ));
                     var related = Ember.linkAssociations(RelatedModel, matchingRecord[relation]);
@@ -346,7 +346,7 @@ var baseController = {
                     // record was returned, something is amiss.
                     if (!records || !records.length || records.length > 1)
                     {
-                        req._sails.log.warn(util.format( 'Unexpected output from `%s.update`.', Model.globalId));
+                        req._sails.log.warn(`Unexpected output from ${Model.globalId}.update.`);
                     }
                     var updatedRecord = records[0];
                     this.interrupts.afterUpdate.call(this, req, res, function(){
